@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
+import json
+import base64
+import datetime
+
+import pandas as pd
+import flask
 import dash
 from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 import dash_html_components as html
-import pandas as pd
-import base64
-import json
 import plotly.plotly as py
 import plotly.graph_objs as go
-import datetime
 from plotly import tools
-import flask
+
 
 server = flask.Flask(__name__)
 app = dash.Dash(__name__, server=server)
