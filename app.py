@@ -19,7 +19,7 @@ app = dash.Dash(__name__, server=server)
 external_css = [
     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css",
     "https://cdn.rawgit.com/plotly/dash-app-stylesheets/2d266c578d2a6e8850ebce48fdb52759b2aef506/stylesheet-oil-and-gas.css",
-    "https://cdn.rawgit.com/amadoukane96/d930d574267b409a1357ea7367ac1dfc/raw/1108ce95d725c636e8f75e1db6e61365c6e74c8a/web_trader.css",
+    "https://cdn.rawgit.com/amadoukane96/d930d574267b409a1357ea7367ac1dfc/raw/bababdfb1149704c62d757c8a2a5d37535c5d659/web_trader.css",
     "https://use.fontawesome.com/releases/v5.2.0/css/all.css"
 ]
 
@@ -113,10 +113,7 @@ def get_row(data):
         [
             html.Summary(
                 [
-                    html.Span(
-                        className="fa fa-plus-circle one columns",
-                        style={"paddingTop": "3px"},
-                    ),
+
                     html.Div(
                         [
                             html.P(
@@ -146,23 +143,24 @@ def get_row(data):
                         ],
                         id=current_row[0] + "row",
                         className="row eleven columns",
-                        style={"height": "25"},
+                        style={"height": "25","float":"right"},
                     ),
                 ],
                 className="row",
+                style={"paddingLeft":"10"}
             ),
 
             html.Button(
                 "Buy/Sell",
                 id=current_row[0] + "Buy",
                 n_clicks=0,
-                style={"marginRight": "5"},
+                style={"margin": "0px 7px 7px 10px","textAlign": "center"},
             ),
             html.Button(
                 "Chart",
                 id=current_row[0] + "Button_chart",
                 n_clicks=1 if current_row[0] in ["EURUSD", "USDCHF"] else 0,
-                style={"marginBottom": "10", "marginLeft": "5"},
+                style={"margin": "0px 7px 7px 10px","textAlign": "center"},
             ),
         ],
         id=current_row[0] + "row_div",
