@@ -2,6 +2,7 @@
 import json
 import base64
 import datetime
+import requests
 
 import pandas as pd
 import flask
@@ -21,7 +22,7 @@ app = dash.Dash(__name__, server=server)
 external_css = [
     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css",
     "https://cdn.rawgit.com/plotly/dash-app-stylesheets/2d266c578d2a6e8850ebce48fdb52759b2aef506/stylesheet-oil-and-gas.css",
-    "https://cdn.rawgit.com/amadoukane96/d930d574267b409a1357ea7367ac1dfc/raw/bababdfb1149704c62d757c8a2a5d37535c5d659/web_trader.css",
+    "https://cdn.rawgit.com/amadoukane96/8f29daabc5cacb0b7e77707fc1956373/raw/854b1dc5d8b25cd2c36002e1e4f598f5f4ebeee3/test.css",
     "https://use.fontawesome.com/releases/v5.2.0/css/all.css"
 ]
 
@@ -49,6 +50,50 @@ def get_logo():
         className="sept columns",
     )
     return logo
+
+
+def generate_news_table(dataframe, max_rows=10):
+    return html.Div(
+        [
+            html.Div(
+                html.Table(
+                    # Header
+                    [html.Tr([html.Th()])]
+                    +
+                    # Body
+                    [
+                        html.Tr(
+                            [
+                                html.Td(
+                                    html.A(
+                                        dataframe.iloc[i]["title"],
+                                        href=dataframe.iloc[i]["url"],
+                                        target="_blank",
+                                    )
+                                )
+                            ]
+                        )
+                        for i in range(min(len(dataframe), max_rows))
+                    ]
+                ),
+                style={"height": "150px", "overflowY": "scroll"},
+            ),
+            html.P(
+                "Last update : " + datetime.datetime.now().strftime("%H:%M:%S"),
+                style={"fontSize": "11", "marginTop": "4", "color": "#45df7e"},
+            ),
+        ],
+        style={"height": "100%"},
+    )
+
+# retrieve and displays news 
+def update_news():
+    r = requests.get('https://newsapi.org/v2/top-headlines?sources=financial-times&apiKey=da8e2e705b914f9f86ed2e9692e66012')
+    json_data = r.json()["articles"]
+    df = pd.DataFrame(json_data)
+    df = pd.DataFrame(df[["title","url"]])
+    return generate_news_table(df)
+
 
 
 # returns  table header with live clock
@@ -167,7 +212,7 @@ def get_row(data):
         ],
         id=current_row[0] + "row_div",
         n_clicks=0,
-        style={"textAlign": "center"},
+        style={"textAlign": "center","paddingTop":"4"},
     )
 
 
@@ -258,7 +303,7 @@ def get_OHLC_data(currency_pair, period="5Min"):
 # Moving average
 def moving_average_trace(df, fig):
     df2 = df.rolling(window=5).mean()
-    trace = go.Scattergl(
+    trace = go.Scatter(
         x=df2.index, y=df2["close"], mode="lines", showlegend=False, name="MA"
     )
     fig.append_trace(trace, 1, 1)  # plot in first row
@@ -268,7 +313,7 @@ def moving_average_trace(df, fig):
 # Exponential moving average
 def e_moving_average_trace(df, fig):
     df2 = df.rolling(window=20).mean()
-    trace = go.Scattergl(
+    trace = go.Scatter(
         x=df2.index, y=df2["close"], mode="lines", showlegend=False, name="EMA"
     )
     fig.append_trace(trace, 1, 1)  # plot in first row
@@ -283,15 +328,15 @@ def bollinger_trace(df, fig, window_size=10, num_of_std=5):
     upper_band = rolling_mean + (rolling_std * num_of_std)
     lower_band = rolling_mean - (rolling_std * num_of_std)
 
-    trace = go.Scattergl(
+    trace = go.Scatter(
         x=df.index, y=upper_band, mode="lines", showlegend=False, name="BB_upper"
     )
 
-    trace2 = go.Scattergl(
+    trace2 = go.Scatter(
         x=df.index, y=rolling_mean, mode="lines", showlegend=False, name="BB_mean"
     )
 
-    trace3 = go.Scattergl(
+    trace3 = go.Scatter(
         x=df.index, y=lower_band, mode="lines", showlegend=False, name="BB_lower"
     )
 
@@ -306,7 +351,7 @@ def accumulation_trace(df):
     df["volume"] = ((df["close"] - df["low"]) - (df["high"] - df["close"])) / (
         df["high"] - df["low"]
     )
-    trace = go.Scattergl(
+    trace = go.Scatter(
         x=df.index, y=df["volume"], mode="lines", showlegend=False, name="Accumulation"
     )
     return trace
@@ -320,7 +365,7 @@ def cci_trace(df, ndays=5):
         / (0.015 * TP.rolling(window=10, center=False).std()),
         name="cci",
     )
-    trace = go.Scattergl(x=df.index, y=CCI, mode="lines", showlegend=False, name="CCI")
+    trace = go.Scatter(x=df.index, y=CCI, mode="lines", showlegend=False, name="CCI")
     return trace
 
 
@@ -329,21 +374,21 @@ def roc_trace(df, ndays=5):
     N = df["close"].diff(ndays)
     D = df["close"].shift(ndays)
     ROC = pd.Series(N / D, name="roc")
-    trace = go.Scattergl(x=df.index, y=ROC, mode="lines", showlegend=False, name="ROC")
+    trace = go.Scatter(x=df.index, y=ROC, mode="lines", showlegend=False, name="ROC")
     return trace
 
 
 # Stochastic oscillator %K
 def stoc_trace(df):
     SOk = pd.Series((df["close"] - df["low"]) / (df["high"] - df["low"]), name="SO%k")
-    trace = go.Scattergl(x=df.index, y=SOk, mode="lines", showlegend=False, name="SO%k")
+    trace = go.Scatter(x=df.index, y=SOk, mode="lines", showlegend=False, name="SO%k")
     return trace
 
 
 # Momentum
 def mom_trace(df, n=5):
     M = pd.Series(df["close"].diff(n), name="Momentum_" + str(n))
-    trace = go.Scattergl(x=df.index, y=M, mode="lines", showlegend=False, name="MOM")
+    trace = go.Scatter(x=df.index, y=M, mode="lines", showlegend=False, name="MOM")
     return trace
 
 
@@ -356,13 +401,13 @@ def pp_trace(df, fig):
     S2 = pd.Series(PP - df["high"] + df["low"])
     R3 = pd.Series(df["high"] + 2 * (PP - df["low"]))
     S3 = pd.Series(df["low"] - 2 * (df["high"] - PP))
-    trace = go.Scattergl(x=df.index, y=PP, mode="lines", showlegend=False, name="PP")
-    trace1 = go.Scattergl(x=df.index, y=R1, mode="lines", showlegend=False, name="R1")
-    trace2 = go.Scattergl(x=df.index, y=S1, mode="lines", showlegend=False, name="S1")
-    trace3 = go.Scattergl(x=df.index, y=R2, mode="lines", showlegend=False, name="R2")
-    trace4 = go.Scattergl(x=df.index, y=S2, mode="lines", showlegend=False, name="S2")
-    trace5 = go.Scattergl(x=df.index, y=R3, mode="lines", showlegend=False, name="R3")
-    trace6 = go.Scattergl(x=df.index, y=S3, mode="lines", showlegend=False, name="S3")
+    trace = go.Scatter(x=df.index, y=PP, mode="lines", showlegend=False, name="PP")
+    trace1 = go.Scatter(x=df.index, y=R1, mode="lines", showlegend=False, name="R1")
+    trace2 = go.Scatter(x=df.index, y=S1, mode="lines", showlegend=False, name="S1")
+    trace3 = go.Scatter(x=df.index, y=R2, mode="lines", showlegend=False, name="R2")
+    trace4 = go.Scatter(x=df.index, y=S2, mode="lines", showlegend=False, name="S2")
+    trace5 = go.Scatter(x=df.index, y=R3, mode="lines", showlegend=False, name="R3")
+    trace6 = go.Scatter(x=df.index, y=S3, mode="lines", showlegend=False, name="S3")
     fig.append_trace(trace, 1, 1)
     fig.append_trace(trace1, 1, 1)
     fig.append_trace(trace2, 1, 1)
@@ -375,14 +420,14 @@ def pp_trace(df, fig):
 
 ## MAIN CHART TRACES (STYLE tab)
 def line_trace(df):
-    trace = go.Scattergl(
+    trace = go.Scatter(
         x=df.index, y=df["close"], mode="lines", showlegend=False, name="line"
     )
     return trace
 
 
 def area_trace(df):
-    trace = go.Scattergl(
+    trace = go.Scatter(
         x=df.index, y=df["close"], showlegend=False, fill="toself", name="area"
     )
     return trace
@@ -431,13 +476,13 @@ def candlestick_trace(df):
 # For buy/sell modal
 def ask_modal_trace(currency_pair, index):
     df = get_ask_bid(currency_pair, index, True)  # returns ten rows
-    return go.Scattergl(x=df.index, y=df["Ask"], mode="lines", showlegend=False)
+    return go.Scatter(x=df.index, y=df["Ask"], mode="lines", showlegend=False)
 
 
 # For buy/sell modal
 def bid_modal_trace(currency_pair, index):
     df = get_ask_bid(currency_pair, index, True)  # returns ten rows
-    return go.Scattergl(x=df.index, y=df["Bid"], mode="lines", showlegend=False)
+    return go.Scatter(x=df.index, y=df["Bid"], mode="lines", showlegend=False)
 
 
 # returns modal figure for a currency pair
@@ -926,6 +971,8 @@ app.layout = html.Div(
         dcc.Interval(id="i_bis", interval=1 * 2000, n_intervals=0),
         # Interval component for graph updates
         dcc.Interval(id="i_tris", interval=1 * 5000, n_intervals=0),
+        # Interval component for graph updates
+        dcc.Interval(id="i_news", interval=1 * 60000, n_intervals=0),
 
 
         # left Div
@@ -934,27 +981,42 @@ app.layout = html.Div(
                 get_logo(),
                 html.Div(
                     children=[get_header()],
-                    style={"backgroundColor": "#18252E"},
+                    style={"backgroundColor": "#18252E","paddingTop":"15"},
                     id="ask_bid_header",
                     className="row",
                 ),
                 html.Div(
                     get_first_pairs(datetime.datetime.now()),
                     style={
-                        "height": "388",
+                        "maxHeight":"45%",
                         "backgroundColor": "#18252E",
                         "color": "white",
                         "fontSize": "12",
+                        "paddingBottom":"15"
                     },
                     className="",
                     id="pairs",
                 ),
+                html.Div([
+                    html.P('Headlines',style={"fontSize":"13","color":"#45df7e"}),
+                    html.Div(update_news(),id="news")
+                    ],
+                    style={
+                        "height":"33%",
+                        "backgroundColor": "#18252E",
+                        "color": "white",
+                        "fontSize": "12",
+                        "padding":"10px 10px 0px 10px",
+                        "marginTop":"5",
+                        "marginBottom":"0"
+                    }),
             ],
             className="three columns",
             style={
                 "backgroundColor": "#1a2d46",
                 "padding": "10",
                 "margin": "0",
+                "height":"100%"
             },
         ),
 
@@ -1584,6 +1646,7 @@ def update_link_label_closed(url, orders):
     return "Closed positions (" + str(length) + ")"
 
 
+
 # hide/show div that contains 'close order' dropdown
 @app.callback(Output("close_orders_div", "style"), [Input("bottom_tab", "pathname")])
 def show_hide_close_orders(url):
@@ -1649,6 +1712,10 @@ def update_top_bar(orders):
 @app.callback(Output("live_clock", "children"), [Input("interval", "n_intervals")])
 def update_time(n):
     return datetime.datetime.now().strftime("%H:%M:%S")
+
+@app.callback(Output("news", "children"), [Input("i_news", "n_intervals")])
+def update_news_div(n):
+    return update_news()
 
 
 if __name__ == "__main__":
