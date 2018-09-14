@@ -5,7 +5,7 @@ Dash abstracts away all of the technologies and protocols required to build an i
 
 Try out the [demo app here](https://dash-web-trader.herokuapp.com/).
 
-![animated1](images/dash-web-trader.gif)
+![animated1](images/dash-web-trader2.gif)
 
 ## Getting Started
 
@@ -16,6 +16,8 @@ The left panel displays ask and bid prices for each pair by reading the dataset 
 
 You can also visualize market prices with candlesticks, line, OHLC bars and make some studies on it with the selected period in the dropdown.
 You can choose these options in the graph div menu by clicking on ☰ .
+
+Finally, top news from Financial Times are displayed on the left and updated on interval updates, using https://newsapi.org/ 
 
 ### Running the app locally
 
