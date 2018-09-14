@@ -3,7 +3,7 @@ This is a demo of the Dash interactive Python framework developed by [Plotly](ht
 
 Dash abstracts away all of the technologies and protocols required to build an interactive web-based application and is a simple and effective way to bind a user interface around your Python code. To learn more check out our [documentation](https://plot.ly/dash).
 
-Try out the [demo app here](https://dash-web-trader.herokuapp.com/).
+Try out the [demo app here](https://dash-gallery.plotly.host/dash-web-trader).
 
 ![animated1](images/dash-web-trader2.gif)
 
