@@ -88,7 +88,7 @@ def generate_news_table(dataframe, max_rows=10):
 
 # retrieve and displays news 
 def update_news():
-    r = requests.get('https://newsapi.org/v2/top-headlines?sources=financial-times&apiKey=da8e2e705b914f9f86ed2e9692e66012')
+    r = requests.get('https://newsapi.org/v2/top-headlines?sources=bbc-news&apiKey=da8e2e705b914f9f86ed2e9692e66012')
     json_data = r.json()["articles"]
     df = pd.DataFrame(json_data)
     df = pd.DataFrame(df[["title","url"]])
